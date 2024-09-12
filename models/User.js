@@ -8,7 +8,7 @@ const userSchema = new Schema(
     username: {
       type: String,
       unique: true,
-      minLength: [5, 'A username has atleast 5 characters'],
+      minLength: [5, 'A username has at least 5 characters'],
       maxLength: [12, 'A username has 12 characters or less'],
       lowercase: true,
     },

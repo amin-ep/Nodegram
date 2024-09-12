@@ -32,19 +32,18 @@ router.route('/login').post(login);
 router.route('/forgetPassword').post(forgetPassword);
 router.route('/resetPassword/:token').post(resetPassword);
 
-router.use(protect);
-router.get('/me', getMe, getUser);
-router.route('/').get(restrictTo('admin'), getAllUsers);
+router.get('/me', protect, getMe, getUser);
+router.route('/').get(protect, restrictTo('admin'), getAllUsers);
 router
   .route('/:id')
   .get(getUser)
-  .patch(restrictTo('admin'), checkUserRole('update'), updateUser)
-  .delete(restrictTo('admin'), checkUserRole('delete'), deleteUser);
+  .patch(protect, restrictTo('admin'), checkUserRole('update'), updateUser)
+  .delete(protect, restrictTo('admin'), checkUserRole('delete'), deleteUser);
 
 router.route('/:userId/likes', likeRouter);
 
-router.delete('/deleteMe', deleteMe);
-router.patch('/updateMe', updateMe);
-router.patch('/updateMyPassword', updateMyPassword);
+router.delete('/deleteMe', protect, deleteMe);
+router.patch('/updateMe', protect, updateMe);
+router.patch('/updateMyPassword', protect, updateMyPassword);
 
 export default router;

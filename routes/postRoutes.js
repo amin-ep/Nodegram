@@ -28,7 +28,7 @@ router
   .get(getAllPosts)
   .post(
     protect,
-    restrictTo('author'),
+    restrictTo('author', 'admin'),
     uploadPostImage,
     setImageOnBody,
     createPost,

@@ -13,10 +13,11 @@ const sendEmail = async options => {
 
   // 2) Define the email options
   const mailOptions = {
-    from: 'Amin Ebadi <amincode24@gmail.com>',
+    from: 'Nodegram <info@aminebadi.ir>',
     to: options.email,
     subject: options.subject,
     text: options.message,
+    html: options.html,
   };
 
   // 3) Actually send the email

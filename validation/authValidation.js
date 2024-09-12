@@ -5,7 +5,7 @@ export const signupValidator = Joi.object({
   email: Joi.string()
     .email({
       minDomainSegments: 2,
-      tlds: { allow: ['com', 'net', 'io'] },
+      tlds: { allow: ['com', 'io'] },
     })
     .required(),
   password: Joi.string().min(8).max(12).required(),

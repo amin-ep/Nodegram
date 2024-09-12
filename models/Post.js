@@ -70,6 +70,7 @@ postSchema.pre(/^find/, function (next) {
       select: '-post user',
     })
     .populate('likeQuantity');
+
   next();
 });
 

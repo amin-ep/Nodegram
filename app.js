@@ -10,10 +10,8 @@ import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
-import specs from './utils/swagger.js';
-import swaggerJsdoc from 'swagger-jsdoc';
 import { swaggerDocumentation } from './documentation/swagger.js';
-
+import cors from 'cors';
 const app = express();
 
 if (process.env.NODE_ENV === 'development') {
@@ -21,6 +19,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 app.use(express.json());
+
 app.use(
   '/documentation',
   swaggerUi.serve,
@@ -40,6 +39,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 app.use(mongoSanitize());
 app.use(helmet());
+app.use(cors());
 // app.use(hpp({ }))
 
 // Routes

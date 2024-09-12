@@ -16,7 +16,8 @@ const multerStorage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = file.mimetype.split('/')[1];
-    cb(null, `post-${Date.now()}.${ext}`);
+    const imageOriginalName = file.originalname.split('.')[0];
+    cb(null, `post-${Date.now()}-${imageOriginalName}.${ext}`);
   },
 });
 
@@ -30,7 +31,7 @@ const multerFilter = (req, file, cb) => {
 
 export const setImageOnBody = (req, res, next) => {
   if (!req.body.image) {
-    req.body.image = `post-${Date.now()}.jpeg`;
+    req.body.image = req.file.filename;
   }
   next();
 };

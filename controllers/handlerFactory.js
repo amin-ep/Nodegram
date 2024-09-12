@@ -44,22 +44,22 @@ export const createOne = (Model, validator) =>
     // set publisher in body from req.user
     if (!req.body.user) req.body.user = req.user.id;
 
-    // validation
+    // // validation
     const { error, value } = validator.validate(req.body);
     if (error) {
       return next(new HTTPError(error.message, 400));
-    } else {
-      // create post
-      const newDoc = await Model.create(req.body);
-
-      // send response
-      res.status(201).json({
-        status: 'success',
-        data: {
-          doc: newDoc,
-        },
-      });
     }
+
+    // create post
+    const newDoc = await Model.create(req.body);
+
+    // send response
+    res.status(201).json({
+      status: 'success',
+      data: {
+        doc: newDoc,
+      },
+    });
   });
 
 export const deleteOne = Model =>

@@ -17,17 +17,19 @@ const createTokenAndRes = (res, statusCode, data, message) => {
     status: 'success',
     token,
     message: message ? message : undefined,
-    data: {
-      data,
-    },
+    data: data,
   });
 };
 
 const sendEmailVerifyKey = async user => {
   const key = await user.generateEmailVerification();
-  const link = `http://localhost/api/v1/users/verifyEmail/:${key}`;
+  const link = `http://localhost:5173/verify/${key}`;
   const html = `
-  Please click this <a href="${link}">Link</a> to verify your email address!
+  <div>
+  <h3>
+    Please click this <a href="${link}">Link</a> to verify your email address!
+  </h3>
+  </div>
   `;
 
   user.emailVerifyKey = key;
@@ -36,6 +38,7 @@ const sendEmailVerifyKey = async user => {
     email: user.email,
     subject: `This is your verification key to verify your email ${key}`,
     html,
+    message: key,
   });
 };
 
@@ -53,22 +56,40 @@ export const signup = catchAsync(async (req, res, next) => {
   if (error) {
     return next(new HTTPError(error.message, 400));
   }
-  // create user
-  const user = await User.create(requestBody);
-  // create email verify code
-  if (!error) {
-    sendEmailVerifyKey(user);
-  }
 
-  res.status(201).json({
-    status: 'success',
-    message: `Sent an email to ${user.email}`,
-  });
+  const existingUser = await User.findOne({ email: email });
+  if (!existingUser) {
+    const user = await User.create(requestBody);
+    sendEmailVerifyKey(user);
+
+    res.status(201).json({
+      status: 'success',
+      message: `Sent an email to ${user.email}`,
+    });
+  } else if (existingUser && existingUser.verified === false) {
+    sendEmailVerifyKey(existingUser);
+
+    res.status(201).json({
+      status: 'success',
+      message: `Sent an email to ${existingUser.email}`,
+    });
+  } else if (existingUser.active === true && existingUser.verified === true) {
+    return next(
+      new HTTPError(
+        'There is a user with this email. Please provide another email',
+        403,
+      ),
+    );
+  }
 });
 
 export const verifyEmail = catchAsync(async (req, res, next) => {
   // get user based on verifyemail
   const user = await User.findOne({ emailVerifyKey: req.params.key });
+
+  if (!user) {
+    return next(new HTTPError('Invalid key!', 404));
+  }
 
   user.verified = true;
   user.emailVerifyKey = undefined;
@@ -86,9 +107,9 @@ export const login = catchAsync(async (req, res, next) => {
     return next(new HTTPError(error.message, 400));
   }
 
-  // chek the user still exists
+  // check the user still exists
   const user = await User.findOne({ email: email }).select('+password');
-  if (!user || !user.correctPassword(password, user.password))
+  if (!user || !(await user.correctPassword(password, user.password)))
     return next(new HTTPError('Incorrect email or password!', 401));
 
   req.user = user;
@@ -99,7 +120,7 @@ export const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(
-        new HTTPError('You do not at premission to performe this action', 403),
+        new HTTPError('You do not at permission to perform this action', 403),
       );
     }
     next();

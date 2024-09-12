@@ -58,7 +58,10 @@ export default function (err, req, res, next) {
 
   if (process.env.NODE_ENV === 'development') {
     sendErrorForDev(err, res);
-  } else if (process.env.NODE_ENV === 'production') {
+  } else if (
+    process.env.NODE_ENV === 'production' ||
+    process.env.NODE_ENV === 'test'
+  ) {
     if (err.name === 'ValidationError') err = handleValidationError(err);
     if (err.name === 'CastError') err = handleCastError(err);
     if (err.code === 11000) err = handleDuplicateFieldError(err);
