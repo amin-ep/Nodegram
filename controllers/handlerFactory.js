@@ -43,8 +43,9 @@ export const createOne = (Model, validator) =>
   catchAsync(async (req, res, next) => {
     // set publisher in body from req.user
     if (!req.body.user) req.body.user = req.user.id;
+    console.log(req.body);
 
-    // // validation
+    // validation
     const { error, value } = validator.validate(req.body);
     if (error) {
       return next(new HTTPError(error.message, 400));

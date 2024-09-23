@@ -5,6 +5,9 @@ import { v4 as uuid } from 'uuid';
 const { Schema } = mongoose;
 const userSchema = new Schema(
   {
+    image: {
+      type: String,
+    },
     username: {
       type: String,
       unique: true,
@@ -20,7 +23,7 @@ const userSchema = new Schema(
     role: {
       type: String,
       default: 'user',
-      enum: ['admin', 'author', 'user'],
+      enum: ['admin', 'user'],
     },
     password: {
       type: String,
@@ -36,11 +39,6 @@ const userSchema = new Schema(
     active: {
       type: Boolean,
       default: true,
-      select: false,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now(),
     },
     changedPasswordAt: Date,
     passwordResetToken: String,
@@ -49,6 +47,7 @@ const userSchema = new Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    timestamps: true,
   },
 );
 

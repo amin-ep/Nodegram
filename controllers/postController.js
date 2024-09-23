@@ -30,8 +30,10 @@ const multerFilter = (req, file, cb) => {
 };
 
 export const setImageOnBody = (req, res, next) => {
-  if (!req.body.image) {
-    req.body.image = req.file.filename;
+  if (req.file) {
+    if (!req.body.image) {
+      req.body.image = req.file.filename;
+    }
   }
   next();
 };

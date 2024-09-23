@@ -7,6 +7,30 @@ import {
 import HTTPError from '../utils/httpError.js';
 import jwt from 'jsonwebtoken';
 import sendEmail from '../emails/email.js';
+import multer from 'multer';
+
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/images/users');
+  },
+  filename: (req, file, cb) => {
+    const ext = file.mimetype.split('/')[1];
+    const imageOriginalName = file.originalname.split('.')[0];
+    cb(null, `user-${Date.now()}-${imageOriginalName}.${ext}`);
+  },
+});
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new HTTPError('Not an image, please upload only images', 400), false);
+  }
+};
+
+const uploads = multer({ storage: multerStorage, fileFilter: multerFilter });
+
+export const uploadUserImage = uploads.single('image');
 
 const createTokenAndRes = (res, statusCode, data, message) => {
   const token = jwt.sign({ id: data._id }, process.env.JWT_SECRET, {
@@ -43,12 +67,13 @@ const sendEmailVerifyKey = async user => {
 };
 
 export const signup = catchAsync(async (req, res, next) => {
-  const { username, email, password, role } = req.body;
+  const { username, email, password, role, image } = req.body;
   const requestBody = {
     username,
     email,
     password,
     role,
+    image,
   };
 
   // validate input data
@@ -84,7 +109,7 @@ export const signup = catchAsync(async (req, res, next) => {
 });
 
 export const verifyEmail = catchAsync(async (req, res, next) => {
-  // get user based on verifyemail
+  // get user based on verifyEmail
   const user = await User.findOne({ emailVerifyKey: req.params.key });
 
   if (!user) {
@@ -144,17 +169,25 @@ export const forgetPassword = catchAsync(async (req, res, next) => {
   )}/api/v1/users/resetPassword/${resetToken}`;
 
   const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
-
+  const link = `http://localhost:5173/resetPassword/${resetToken}`;
+  const html = `
+  <div>
+  <h3>
+    Please click this <a href="${link}">Link</a> to verify your email address!
+  </h3>
+  </div>
+  `;
   try {
     await sendEmail({
       email: user.email,
       subject: 'Your password reset token (valid for 10 min)',
       message,
+      html: html,
     });
 
     res.status(200).json({
       status: 'success',
-      message: 'Token sent to email!',
+      message: `An email sent to ${user.email}`,
     });
   } catch (err) {
     user.passwordResetToken = undefined;

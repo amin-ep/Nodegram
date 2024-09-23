@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import catchAsync from '../utils/catchAsync.js';
 import HTTPError from '../utils/httpError.js';
+import { updateMeValidator } from '../validation/userValidation.js';
 import { deleteOne, getAll, getOne } from './handlerFactory.js';
 
 const filteredBodyObj = (obj, ...allowFields) => {
@@ -32,15 +33,15 @@ export const deleteMe = catchAsync(async (req, res, next) => {
 });
 
 export const updateMe = catchAsync(async (req, res, next) => {
-  const filteredBody = filteredBodyObj(req.body, 'username', 'email');
+  const filteredBody = filteredBodyObj(req.body, 'username', 'email', 'image');
   if (req.body.password) {
     return next(
       new HTTPError('You cannot update your password in this route!', 400),
     );
   }
 
-  const user = await User.findByIdAndUpdate(req.user.id, filteredBody, {
-    new: true,
+  const user = await User.findByIdAndUpdate(req.user.id, req.body, {
+    returnOriginal: false,
   });
 
   if (!user) {
@@ -79,6 +80,12 @@ export const updateMyPassword = catchAsync(async (req, res, next) => {
 });
 
 export const updateUser = catchAsync(async (req, res, next) => {
+  const { error } = updateMeValidator.validate(req.body);
+
+  if (error) {
+    return next(new HTTPError(error.message, 400));
+  }
+
   const user = await User.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,

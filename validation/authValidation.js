@@ -1,6 +1,7 @@
 import Joi from 'joi';
 
 export const signupValidator = Joi.object({
+  image: Joi.string(),
   username: Joi.string().min(5).max(12).required().lowercase(),
   email: Joi.string()
     .email({

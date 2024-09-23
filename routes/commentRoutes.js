@@ -18,14 +18,9 @@ import express from 'express';
 const router = express.Router({ mergeParams: true });
 
 router.use(protect);
-router
-  .route('/')
-  .get(getAllComments)
-  .post(protect, restrictTo('author', 'user'), checkPostId, createComment);
+router.route('/').get(getAllComments).post(protect, checkPostId, createComment);
 
-router
-  .route('/replies')
-  .post(protect, restrictTo('author', 'user'), checkPostId, createReply);
+router.route('/replies').post(protect, checkPostId, createReply);
 
 router
   .route('/:id')

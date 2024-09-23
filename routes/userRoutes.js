@@ -6,6 +6,7 @@ import {
   resetPassword,
   verifyEmail,
   restrictTo,
+  uploadUserImage,
 } from '../controllers/authController.js';
 import {
   getAllUsers,
@@ -23,10 +24,11 @@ import {
   protect,
 } from '../middlewares/accecibilityMiddleware.js';
 import likeRouter from '../routes/likeRoutes.js';
+import { setImageOnBody } from '../controllers/postController.js';
 
 const router = express.Router();
 
-router.route('/signup').post(signup);
+router.route('/signup').post(uploadUserImage, setImageOnBody, signup);
 router.route('/verifyEmail/:key').post(verifyEmail);
 router.route('/login').post(login);
 router.route('/forgetPassword').post(forgetPassword);
@@ -34,6 +36,10 @@ router.route('/resetPassword/:token').post(resetPassword);
 
 router.get('/me', protect, getMe, getUser);
 router.route('/').get(protect, restrictTo('admin'), getAllUsers);
+router.delete('/deleteMe', protect, deleteMe);
+router.patch('/updateMe', protect, uploadUserImage, setImageOnBody, updateMe);
+router.patch('/updateMyPassword', protect, updateMyPassword);
+
 router
   .route('/:id')
   .get(getUser)
@@ -41,9 +47,5 @@ router
   .delete(protect, restrictTo('admin'), checkUserRole('delete'), deleteUser);
 
 router.route('/:userId/likes', likeRouter);
-
-router.delete('/deleteMe', protect, deleteMe);
-router.patch('/updateMe', protect, updateMe);
-router.patch('/updateMyPassword', protect, updateMyPassword);
 
 export default router;

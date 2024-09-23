@@ -22,14 +22,11 @@ const commentSchema = new Schema(
       ref: 'Comment',
       default: null,
     },
-    commentedAt: {
-      type: Date,
-      default: Date.now(),
-    },
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    timestamps: true,
   },
 );
 
@@ -42,6 +39,14 @@ commentSchema.virtual('replies', {
 commentSchema.pre('find', function (next) {
   this.populate({ path: 'replies' });
 
+  next();
+});
+
+commentSchema.pre('save', async function (next) {
+  await this.populate({
+    path: 'user',
+    select: 'username image',
+  });
   next();
 });
 
