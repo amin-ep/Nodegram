@@ -28,7 +28,7 @@ router
   .get(getAllPosts)
   .post(
     protect,
-    restrictTo('author', 'admin'),
+    restrictTo('admin'),
     uploadPostImage,
     setImageOnBody,
     createPost,
@@ -39,13 +39,12 @@ router
   .get(getPost)
   .patch(
     protect,
-    restrictTo('author'),
+    restrictTo('admin'),
     checkDocuemntsUser(Post),
     uploadPostImage,
     setImageOnBody,
     updatePost,
   )
-
-  .delete(protect, restrictTo('author'), checkDocuemntsUser(Post), deletePost);
+  .delete(protect, restrictTo('admin'), checkDocuemntsUser(Post), deletePost);
 
 export default router;

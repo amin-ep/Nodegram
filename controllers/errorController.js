@@ -67,7 +67,14 @@ export default function (err, req, res, next) {
     if (err.code === 11000) err = handleDuplicateFieldError(err);
     if (err.name === 'JsonWebTokenError') err = handleJWTError();
     if (err.name === 'TokenExpiredError') err = handleJWTExpieredError();
-
+    if (err.statusCode === 429) {
+      return next(
+        new HTTPError(
+          'Too many requests from this IP, Please try again in an hour!',
+          429,
+        ),
+      );
+    }
     sendErrorForProd(err, res);
   }
 }

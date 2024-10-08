@@ -31,3 +31,7 @@ export const forgetPasswordValidator = Joi.object({
     })
     .required(),
 });
+
+export const resetPasswordValidator = Joi.object({
+  password: Joi.string().min(8).max(12).required(),
+});

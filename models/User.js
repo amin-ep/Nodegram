@@ -14,6 +14,7 @@ const userSchema = new Schema(
       minLength: [5, 'A username has at least 5 characters'],
       maxLength: [12, 'A username has 12 characters or less'],
       lowercase: true,
+      trim: true,
     },
     email: {
       type: String,
@@ -69,26 +70,26 @@ userSchema.virtual('likes', {
   localField: '_id',
 });
 
-userSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: 'posts',
-    select: 'title image -user likesQuantity',
-  })
-    .populate({
-      path: 'comments',
-      select: '-user text post',
-    })
-    .populate({
-      path: 'likes',
-      select: '-user post createdAt',
-    });
-  next();
-});
+// userSchema.pre(/^find/, function (next) {
+//   this.populate({
+//     path: 'posts',
+//     select: 'title image -user likesQuantity',
+//   })
+//     .populate({
+//       path: 'comments',
+//       select: '-user text post',
+//     })
+//     .populate({
+//       path: 'likes',
+//       select: '-user post createdAt',
+//     });
+//   next();
+// });
 
-userSchema.pre(/^find/, function (next) {
-  this.find({ active: { $ne: false } });
-  next();
-});
+// userSchema.pre(/^find/, function (next) {
+//   this.find({ active: { $ne: false } });
+//   next();
+// });
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();

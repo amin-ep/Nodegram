@@ -31,7 +31,7 @@ app.use('/static', express.static('public/images'));
 
 const limiter = rateLimit({
   limit: 100,
-  windowMs: 60 * 60 * 1000,
+  windowMs: 60 * 15 * 1000,
   message: 'Too many requests from this IP, Please try again in an hour!',
   statusCode: 429,
 });

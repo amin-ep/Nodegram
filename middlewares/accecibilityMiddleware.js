@@ -6,11 +6,14 @@ import catchAsync from '../utils/catchAsync.js';
 
 export const checkDocuemntsUser = Model => {
   return async (req, res, next) => {
-    const doc = await Model.findOne({ _id: req.params.id });
+    const doc = await Model.findById(req.params.id);
+
+    console.log(doc);
 
     if (!doc) {
       return next(new HTTPError(`doc not found!`, 404));
     }
+
     const token = req.headers.authorization.split(' ')[1];
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
     if (doc.user.toString() !== decoded.id) {
@@ -24,7 +27,7 @@ export const checkUserRole = method => {
   return async (req, res, next) => {
     const user = await User.findOne({ _id: req.params.id });
 
-    if (user.role === 'admin') {
+    if (user?.role === 'admin') {
       return next(
         new HTTPError(`You cannot ${method} the data of an admin`, 403),
       );

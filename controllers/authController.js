@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import {
   signupValidator,
   loginValidator,
+  resetPasswordValidator,
 } from '../validation/authValidation.js';
 import HTTPError from '../utils/httpError.js';
 import jwt from 'jsonwebtoken';
@@ -78,6 +79,7 @@ export const signup = catchAsync(async (req, res, next) => {
 
   // validate input data
   const { error } = signupValidator.validate(requestBody);
+
   if (error) {
     return next(new HTTPError(error.message, 400));
   }
@@ -201,6 +203,11 @@ export const forgetPassword = catchAsync(async (req, res, next) => {
 });
 
 export const resetPassword = catchAsync(async (req, res, next) => {
+  const { error } = resetPasswordValidator.validate(req.body);
+
+  if (error) {
+    return next(new HTTPError(error.message, 400));
+  }
   // 1) Get user based on the token
   const user = await User.findOne({
     passwordResetToken: req.params.token,

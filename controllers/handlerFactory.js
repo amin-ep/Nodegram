@@ -6,17 +6,27 @@ export const getAll = Model =>
   catchAsync(async (req, res, next) => {
     let filter = {};
     if (req.params.postId) filter = { post: req.params.postId };
+
+    const totalDocs = await Model.countDocuments(filter);
+
     const features = new APIFeatures(Model.find(), req.query)
       .filter()
       .sort()
       .paginate()
       .limitFields();
 
+    let currentPage = req.query.page ? +req.query.page : 1;
+
+    const limit = req.query.limit * 1 || 20;
+    const totalPages = Math.ceil(totalDocs / limit);
+
     const docs = await features.query;
 
     res.status(200).json({
       status: 'success',
       result: docs.length,
+      currentPage: +currentPage,
+      totalPages,
       data: {
         docs,
       },
@@ -68,6 +78,7 @@ export const deleteOne = Model =>
     const doc = await Model.findByIdAndDelete(req.params.id);
 
     if (!doc) return next(new HTTPError(`Invalid Id: ${req.params.id}`));
+
     res.status(204).json({
       status: 'success',
       data: null,
@@ -82,7 +93,7 @@ export const updateOne = Model =>
     });
 
     if (!doc) {
-      return next(new HTTPError(`Invalid Id: ${req.params.id}`));
+      return next(new HTTPError(`Invalid Id: ${req.params.id}`, 404));
     }
 
     res.status(200).json({

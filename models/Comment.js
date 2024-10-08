@@ -20,7 +20,6 @@ const commentSchema = new Schema(
     parentComment: {
       type: Schema.Types.ObjectId,
       ref: 'Comment',
-      default: null,
     },
   },
   {
@@ -36,9 +35,11 @@ commentSchema.virtual('replies', {
   localField: '_id',
 });
 
-commentSchema.pre('find', function (next) {
-  this.populate({ path: 'replies' });
-
+commentSchema.pre(/^find/, function (next) {
+  this.populate({ path: 'replies' }).populate({
+    path: 'user',
+    select: 'username image',
+  });
   next();
 });
 
