@@ -44,6 +44,7 @@ const userSchema = new Schema(
     changedPasswordAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    verificationNumber: String,
   },
   {
     toJSON: { virtuals: true },
@@ -94,7 +95,11 @@ userSchema.virtual('likes', {
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
+  const number = Math.floor(Math.random() * 99999999 - 10000000);
   this.password = await bcrypt.hash(this.password, 12);
+  this.verificationNumber = await bcrypt.hash(String(number), 12);
+
+  console.log(number);
   next();
 });
 
@@ -127,6 +132,10 @@ userSchema.methods.createresetPasswordToken = function () {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 
   return this.passwordResetToken;
+};
+
+userSchema.methods.verifyInputNumber = function (inputNumber) {
+  return bcrypt.compare(inputNumber, this.verificationNumber);
 };
 
 export default mongoose.model('User', userSchema);

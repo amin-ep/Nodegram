@@ -4,6 +4,7 @@ import {
   signupValidator,
   loginValidator,
   resetPasswordValidator,
+  validateVerifyEmail,
 } from '../validation/authValidation.js';
 import HTTPError from '../utils/httpError.js';
 import jwt from 'jsonwebtoken';
@@ -112,12 +113,28 @@ export const signup = catchAsync(async (req, res, next) => {
 
 export const verifyEmail = catchAsync(async (req, res, next) => {
   // get user based on verifyEmail
+
   const user = await User.findOne({ emailVerifyKey: req.params.key });
 
   if (!user) {
     return next(new HTTPError('Invalid key!', 404));
   }
 
+  const { error } = validateVerifyEmail.validate(req.body);
+
+  if (error) {
+    return next(new HTTPError(error.message, 400));
+  }
+
+  const number = await user.verifyInputNumber(req.body.number);
+
+  // 78975407
+
+  if (!(await user.verifyInputNumber(req.body.number))) {
+    return next(new HTTPError('Invalid number', 400));
+  }
+
+  user.verificationNumber = undefined;
   user.verified = true;
   user.emailVerifyKey = undefined;
   await user.save({ validateBeforeSave: false });

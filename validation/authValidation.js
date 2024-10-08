@@ -35,3 +35,7 @@ export const forgetPasswordValidator = Joi.object({
 export const resetPasswordValidator = Joi.object({
   password: Joi.string().min(8).max(12).required(),
 });
+
+export const validateVerifyEmail = Joi.object({
+  number: Joi.string().min(8).max(12),
+});
